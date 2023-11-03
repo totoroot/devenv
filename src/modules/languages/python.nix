@@ -56,6 +56,9 @@ let
       ${lib.optionalString cfg.poetry.enable ''
         [ -f "${config.env.DEVENV_STATE}/poetry.lock.checksum" ] && rm ${config.env.DEVENV_STATE}/poetry.lock.checksum
       ''}
+      ${lib.optionalString cfg.pdm.enable ''
+        [ -f "${config.env.DEVENV_STATE}/pdm.lock.checksum" ] && rm ${config.env.DEVENV_STATE}/pdm.lock.checksum
+      ''}
       echo ${package.interpreter} -m venv "$VENV_PATH"
       ${package.interpreter} -m venv "$VENV_PATH"
     fi
@@ -111,6 +114,57 @@ let
         _devenv_poetry_install
       ''}
       ${lib.optionalString cfg.poetry.activate.enable ''
+        source "$DEVENV_ROOT"/.venv/bin/activate
+      ''}
+    fi
+  '';
+
+  initPDMScript = pkgs.writeShellScript "init-pdm.sh" ''
+    function _devenv_init_pdm_venv
+    {
+      # Make sure any tools are not attempting to use the python interpreter from any
+      # existing virtual environment. For instance if devenv was started within an venv.
+      unset VIRTUAL_ENV
+
+      # Make sure pdm's venv uses the configured python executable.
+      ${cfg.pdm.package}/bin/pdm use --quiet ${package.interpreter}
+      }
+
+      function _devenv_pdm_install
+      {
+      local PDM_INSTALL_COMMAND=(${cfg.pdm.package}/bin/pdm install --quiet)
+      # Avoid running "pdm install" for every shell.
+      # Only run it when the "pdm.lock" file or python interpreter has changed.
+      # We do this by storing the interpreter path and a hash of "pdm.lock" in venv.
+      local ACTUAL_PDM_CHECKSUM="${package.interpreter}:$(${pkgs.nix}/bin/nix-hash --type sha256 pyproject.toml):$(${pkgs.nix}/bin/nix-hash --type sha256 pdm.lock):''${PDM_INSTALL_COMMAND[@]}"
+      local PDM_CHECKSUM_FILE="$DEVENV_ROOT"/.venv/pdm.lock.checksum
+      if [ -f "$PDM_CHECKSUM_FILE" ]
+      then
+      read -r EXPECTED_PDM_CHECKSUM < "$PDM_CHECKSUM_FILE"
+      else
+      EXPECTED_PDM_CHECKSUM=""
+      fi
+
+      if [ "$ACTUAL_PDM_CHECKSUM" != "$EXPECTED_PDM_CHECKSUM" ]
+      then
+      if ''${PDM_INSTALL_COMMAND[@]}
+        then
+          echo "$ACTUAL_PDM_CHECKSUM" > "$PDM_CHECKSUM_FILE"
+        else
+          echo "PDM install failed. Run 'pdm install' manually."
+        fi
+      fi
+    }
+
+    if [ ! -f pyproject.toml ]
+    then
+      echo "No pyproject.toml found. Run 'pdm init' to create one." >&2
+    else
+      _devenv_init_pdm_venv
+      ${lib.optionalString cfg.pdm.install.enable ''
+        _devenv_pdm_install
+      ''}
+      ${lib.optionalString cfg.pdm.activate.enable ''
         source "$DEVENV_ROOT"/.venv/bin/activate
       ''}
     fi
@@ -207,12 +261,22 @@ in
         };
       };
       activate.enable = lib.mkEnableOption "activate the poetry virtual environment automatically";
-
       package = lib.mkOption {
         type = lib.types.package;
         default = pkgs.poetry;
         defaultText = lib.literalExpression "pkgs.poetry";
         description = "The Poetry package to use.";
+      };
+    };
+    pdm = {
+      enable = lib.mkEnableOption "pdm";
+      install.enable = lib.mkEnableOption "pdm install during devenv initialisation";
+      activate.enable = lib.mkEnableOption "activate the PDM virtual environment automatically";
+      package = lib.mkOption {
+        type = lib.types.package;
+        default = pkgs.pdm;
+        defaultText = lib.literalExpression "pkgs.pdm";
+        description = "The PDM package to use.";
       };
     };
   };
@@ -228,6 +292,9 @@ in
 
     languages.python.poetry.activate.enable = lib.mkIf cfg.poetry.enable (lib.mkDefault true);
 
+    languages.python.pdm.install.enable = lib.mkIf cfg.pdm.enable (lib.mkDefault true);
+    languages.python.pdm.activate.enable = lib.mkIf cfg.pdm.enable (lib.mkDefault true);
+
     languages.python.package = lib.mkMerge [
       (lib.mkIf (cfg.version != null)
         (nixpkgs-python.packages.${pkgs.stdenv.system}.${cfg.version} or (throw "Unsupported Python version, see https://github.com/cachix/nixpkgs-python#supported-python-versions")))
@@ -237,7 +304,8 @@ in
 
     packages = [
       package
-    ] ++ (lib.optional cfg.poetry.enable cfg.poetry.package);
+    ] ++ (lib.optional cfg.poetry.enable cfg.poetry.package)
+    ++ (lib.optional cfg.pdm.enable cfg.pdm.package);
 
     env = lib.optionalAttrs cfg.poetry.enable {
       # Make poetry use DEVENV_ROOT/.venv
@@ -257,6 +325,8 @@ in
       source ${initVenvScript}
     '') ++ (lib.optional cfg.poetry.install.enable ''
       source ${initPoetryScript}
+    '') ++ (lib.optional cfg.pdm.install.enable ''
+      source ${initPDMScript}
     '')
     );
   };
