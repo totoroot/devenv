@@ -100,13 +100,13 @@
         print "    url: path:../../src/modules";
       }
     ' devenv.yaml.orig > devenv.yaml
-    trap_restore_yaml() { 
+    trap_restore_yaml() {
       mv "$example/devenv.yaml.orig" "$example/devenv.yaml"
     }
     devenv ci
     if [ -f .test.sh ]; then
-      trap_restore_local() { 
-        rm "$example/devenv.local.nix" 
+      trap_restore_local() {
+        rm "$example/devenv.local.nix"
         rm -rf "$example/.devenv"
       }
       # coreutils-full provides timeout on darwin
@@ -144,7 +144,7 @@
     cat > docs/languages-all.md <<EOF
       \`\`\`nix
       ${lib.concatStringsSep "\n  " (map (lang: "languages.${lang}.enable = true;") (builtins.attrNames config.languages))}
-      \`\`\`   
+      \`\`\`
     EOF
   '';
 
