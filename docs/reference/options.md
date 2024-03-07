@@ -123,6 +123,69 @@ package
 
 
 
+## aws-vault.opentofuWrapper
+
+Attribute set of packages including opentofu
+
+
+
+*Type:*
+submodule
+
+
+
+*Default:*
+` pkgs `
+
+*Declared by:*
+ - [https://github.com/cachix/devenv/blob/main/src/modules/integrations/aws-vault.nix](https://github.com/cachix/devenv/blob/main/src/modules/integrations/aws-vault.nix)
+
+
+
+## aws-vault.opentofuWrapper.enable
+
+Whether to enable Wraps opentofu binary as `aws-vault exec <profile> -- opentofu <args>`.
+.
+
+
+
+*Type:*
+boolean
+
+
+
+*Default:*
+` false `
+
+
+
+*Example:*
+` true `
+
+*Declared by:*
+ - [https://github.com/cachix/devenv/blob/main/src/modules/integrations/aws-vault.nix](https://github.com/cachix/devenv/blob/main/src/modules/integrations/aws-vault.nix)
+
+
+
+## aws-vault.opentofuWrapper.package
+
+The opentofu package to use.
+
+
+
+*Type:*
+package
+
+
+
+*Default:*
+` pkgs.opentofu `
+
+*Declared by:*
+ - [https://github.com/cachix/devenv/blob/main/src/modules/integrations/aws-vault.nix](https://github.com/cachix/devenv/blob/main/src/modules/integrations/aws-vault.nix)
+
+
+
 ## aws-vault.profile
 
 
@@ -1671,7 +1734,7 @@ boolean
 
 ## languages.javascript.package
 
-The Node package to use, for example pkgs.bun
+The Node.js package to use.
 
 
 
@@ -1681,16 +1744,16 @@ package
 
 
 *Default:*
-` pkgs.nodejs `
+` pkgs.nodejs-slim `
 
 *Declared by:*
  - [https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix](https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix)
 
 
 
-## languages.javascript.corepack.enable
+## languages.javascript.bun.enable
 
-Whether to enable shims for package managers besides npm.
+Whether to enable install bun.
 
 
 
@@ -1712,9 +1775,279 @@ boolean
 
 
 
+## languages.javascript.bun.package
+
+The bun package to use.
+
+
+
+*Type:*
+package
+
+
+
+*Default:*
+` pkgs.bun `
+
+*Declared by:*
+ - [https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix](https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix)
+
+
+
+## languages.javascript.bun.install.enable
+
+Whether to enable bun install during devenv initialisation.
+
+
+
+*Type:*
+boolean
+
+
+
+*Default:*
+` false `
+
+
+
+*Example:*
+` true `
+
+*Declared by:*
+ - [https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix](https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix)
+
+
+
+## languages.javascript.corepack.enable
+
+Whether to enable wrappers for npm, pnpm and Yarn via Node.js Corepack.
+
+
+
+*Type:*
+boolean
+
+
+
+*Default:*
+` false `
+
+
+
+*Example:*
+` true `
+
+*Declared by:*
+ - [https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix](https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix)
+
+
+
+## languages.javascript.directory
+
+The JavaScript project's root directory. Defaults to the root of the devenv project.
+Can be an absolute path or one relative to the root of the devenv project.
+
+
+
+
+*Type:*
+string
+
+
+
+*Default:*
+` config.devenv.root `
+
+
+
+*Example:*
+` "./directory" `
+
+*Declared by:*
+ - [https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix](https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix)
+
+
+
+## languages.javascript.npm.enable
+
+Whether to enable install npm.
+
+
+
+*Type:*
+boolean
+
+
+
+*Default:*
+` false `
+
+
+
+*Example:*
+` true `
+
+*Declared by:*
+ - [https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix](https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix)
+
+
+
+## languages.javascript.npm.package
+
+The Node.js package to use.
+
+
+
+*Type:*
+package
+
+
+
+*Default:*
+` pkgs.nodejs `
+
+*Declared by:*
+ - [https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix](https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix)
+
+
+
 ## languages.javascript.npm.install.enable
 
 Whether to enable npm install during devenv initialisation.
+
+
+
+*Type:*
+boolean
+
+
+
+*Default:*
+` false `
+
+
+
+*Example:*
+` true `
+
+*Declared by:*
+ - [https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix](https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix)
+
+
+
+## languages.javascript.pnpm.enable
+
+Whether to enable install pnpm.
+
+
+
+*Type:*
+boolean
+
+
+
+*Default:*
+` false `
+
+
+
+*Example:*
+` true `
+
+*Declared by:*
+ - [https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix](https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix)
+
+
+
+## languages.javascript.pnpm.package
+
+The pnpm package to use.
+
+
+
+*Type:*
+package
+
+
+
+*Default:*
+` pkgs.nodePackages.pnpm `
+
+*Declared by:*
+ - [https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix](https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix)
+
+
+
+## languages.javascript.pnpm.install.enable
+
+Whether to enable pnpm install during devenv initialisation.
+
+
+
+*Type:*
+boolean
+
+
+
+*Default:*
+` false `
+
+
+
+*Example:*
+` true `
+
+*Declared by:*
+ - [https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix](https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix)
+
+
+
+## languages.javascript.yarn.enable
+
+Whether to enable install yarn.
+
+
+
+*Type:*
+boolean
+
+
+
+*Default:*
+` false `
+
+
+
+*Example:*
+` true `
+
+*Declared by:*
+ - [https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix](https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix)
+
+
+
+## languages.javascript.yarn.package
+
+The yarn package to use.
+
+
+
+*Type:*
+package
+
+
+
+*Default:*
+` pkgs.yarn `
+
+*Declared by:*
+ - [https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix](https://github.com/cachix/devenv/blob/main/src/modules/languages/javascript.nix)
+
+
+
+## languages.javascript.yarn.install.enable
+
+Whether to enable yarn install during devenv initialisation.
 
 
 
@@ -1855,8 +2188,6 @@ boolean
 
 The Lua package to use.
 
-
-
 *Type:*
 package
 
@@ -1996,6 +2327,49 @@ attribute set
 
 *Declared by:*
  - [https://github.com/cachix/devenv/blob/main/src/modules/languages/ocaml.nix](https://github.com/cachix/devenv/blob/main/src/modules/languages/ocaml.nix)
+
+
+
+## languages.opentofu.enable
+
+Whether to enable tools for OpenTofu development.
+
+
+
+*Type:*
+boolean
+
+
+
+*Default:*
+` false `
+
+
+
+*Example:*
+` true `
+
+*Declared by:*
+ - [https://github.com/cachix/devenv/blob/main/src/modules/languages/opentofu.nix](https://github.com/cachix/devenv/blob/main/src/modules/languages/opentofu.nix)
+
+
+
+## languages.opentofu.package
+
+The OpenTofu package to use.
+
+
+
+*Type:*
+package
+
+
+
+*Default:*
+` pkgs.opentofu `
+
+*Declared by:*
+ - [https://github.com/cachix/devenv/blob/main/src/modules/languages/opentofu.nix](https://github.com/cachix/devenv/blob/main/src/modules/languages/opentofu.nix)
 
 
 
@@ -2264,6 +2638,8 @@ null or strings concatenated with “\\n”
 ## languages.php.fpm.phpOptions
 
 Options appended to the PHP configuration file `php.ini`.
+
+
 
 
 *Type:*
@@ -3800,6 +4176,54 @@ package
 
 
 
+## languages.vala.enable
+
+Whether to enable tools for Vala development.
+
+
+
+*Type:*
+boolean
+
+
+
+*Default:*
+` false `
+
+
+
+*Example:*
+` true `
+
+*Declared by:*
+ - [https://github.com/cachix/devenv/blob/main/src/modules/languages/vala.nix](https://github.com/cachix/devenv/blob/main/src/modules/languages/vala.nix)
+
+
+
+## languages.vala.package
+
+The Vala package to use.
+
+
+
+*Type:*
+package
+
+
+
+*Default:*
+` pkgs.vala `
+
+
+
+*Example:*
+` pkgs.vala_0_54 `
+
+*Declared by:*
+ - [https://github.com/cachix/devenv/blob/main/src/modules/languages/vala.nix](https://github.com/cachix/devenv/blob/main/src/modules/languages/vala.nix)
+
+
+
 ## languages.zig.enable
 
 Whether to enable tools for Zig development.
@@ -4403,8 +4827,6 @@ attribute set of (submodule)
 
 ## pre-commit.hooks.\<name>.enable
 
-
-
 Whether to enable this pre-commit hook.
 
 
@@ -4847,6 +5269,8 @@ boolean
 
 
 ## pre-commit.settings.alejandra.exclude
+
+
 
 Files or directories to exclude from formatting.
 
@@ -6578,8 +7002,6 @@ list of string
 
 ## pre-commit.settings.php-cs-fixer.binPath
 
-
-
 PHP-CS-Fixer binary path.
 
 
@@ -7012,6 +7434,8 @@ one of “stderr”, “errfmt”, “json”
 
 
 ## pre-commit.settings.statix.ignore
+
+
 
 Globs of file patterns to skip.
 
