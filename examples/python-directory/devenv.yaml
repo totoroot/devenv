@@ -1,4 +1,6 @@
 inputs:
+  devenv:
+    url: github:totoroot/devenv/pyproject-location-test
   nixpkgs:
     url: github:NixOS/nixpkgs/nixpkgs-unstable
   nixpkgs-python:

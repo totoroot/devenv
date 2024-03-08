@@ -17,12 +17,14 @@ let
           url: github:cachix/nixpkgs-python
   '');
 
+  directoryPath = if (cfg.directory != config.devenv.root) then cfg.directory else "";
+
   initVenvScript = pkgs.writeShellScript "init-venv.sh" ''
     # Make sure any tools are not attempting to use the Python interpreter from any
     # existing virtual environment. For instance if devenv was started within an venv.
     unset VIRTUAL_ENV
 
-    VENV_PATH="${config.env.DEVENV_STATE}/${lib.optionalString (cfg.directory != config.devenv.root) ''"${cfg.directory}/"''}venv"
+    VENV_PATH="${config.env.DEVENV_STATE}/${lib.optionalString (directoryPath != config.devenv.root) ''"${directoryPath}/"''}venv"
 
     if [ ! -L "$VENV_PATH"/devenv-profile ] \
     || [ "$(${pkgs.coreutils}/bin/readlink "$VENV_PATH"/devenv-profile)" != "${config.devenv.profile}" ]
@@ -59,12 +61,12 @@ let
 
     function _devenv-poetry-install()
     {
-      local POETRY_INSTALL_COMMAND=(${cfg.poetry.package}/bin/poetry install --no-interaction ${lib.concatStringsSep " " cfg.poetry.install.arguments} ${lib.optionalString (cfg.directory != config.devenv.root) ''--directory=${cfg.directory}''})
+      local POETRY_INSTALL_COMMAND=(${cfg.poetry.package}/bin/poetry install --no-interaction ${lib.concatStringsSep " " cfg.poetry.install.arguments} ${lib.optionalString (directoryPath != config.devenv.root) ''--directory=${directoryPath}''})
       # Avoid running "poetry install" for every shell.
       # Only run it when the "poetry.lock" file or Python interpreter has changed.
       # We do this by storing the interpreter path and a hash of "poetry.lock" in venv.
-      local ACTUAL_POETRY_CHECKSUM="${cfg.package.interpreter}:$(${pkgs.nix}/bin/nix-hash --type sha256 "$DEVENV_ROOT"/${lib.optionalString (cfg.directory != config.devenv.root) ''${cfg.directory}/''}pyproject.toml):$(${pkgs.nix}/bin/nix-hash --type sha256 "$DEVENV_ROOT"/${lib.optionalString (cfg.directory != config.devenv.root) ''${cfg.directory}/''}poetry.lock):''${POETRY_INSTALL_COMMAND[@]}"
-      local POETRY_CHECKSUM_FILE="$DEVENV_ROOT"/${lib.optionalString (cfg.directory != config.devenv.root) ''${cfg.directory}/''}.venv/poetry.lock.checksum
+      local ACTUAL_POETRY_CHECKSUM="${cfg.package.interpreter}:$(${pkgs.nix}/bin/nix-hash --type sha256 "$DEVENV_ROOT"/${lib.optionalString (directoryPath != config.devenv.root) ''${directoryPath}/''}pyproject.toml):$(${pkgs.nix}/bin/nix-hash --type sha256 "$DEVENV_ROOT"/${lib.optionalString (directoryPath != config.devenv.root) ''${directoryPath}/''}poetry.lock):''${POETRY_INSTALL_COMMAND[@]}"
+      local POETRY_CHECKSUM_FILE="$DEVENV_ROOT"/${lib.optionalString (directoryPath != config.devenv.root) ''${directoryPath}/''}.venv/poetry.lock.checksum
       if [ -f "$POETRY_CHECKSUM_FILE" ]
       then
         read -r EXPECTED_POETRY_CHECKSUM < "$POETRY_CHECKSUM_FILE"
@@ -83,7 +85,7 @@ let
       fi
     }
 
-    if [ ! -f "$DEVENV_ROOT"/${lib.optionalString (cfg.directory != config.devenv.root) ''${cfg.directory}/''}pyproject.toml ]
+    if [ ! -f "$DEVENV_ROOT"/${lib.optionalString (directoryPath != config.devenv.root) ''${directoryPath}/''}pyproject.toml ]
     then
       echo "No pyproject.toml found. Run 'poetry init' to create one." >&2
     else
@@ -92,7 +94,7 @@ let
         _devenv-poetry-install
       ''}
       ${lib.optionalString cfg.poetry.activate.enable ''
-        source "$DEVENV_ROOT"/${lib.optionalString (cfg.directory != config.devenv.root) ''${cfg.directory}/''}.venv/bin/activate
+        source "$DEVENV_ROOT"/${lib.optionalString (directoryPath != config.devenv.root) ''${directoryPath}/''}.venv/bin/activate
       ''}
     fi
   '';
@@ -119,9 +121,9 @@ in
     };
 
     directory = lib.mkOption {
-      type = lib.types.str;
-      default = config.devenv.root;
-      defaultText = lib.literalExpression "config.devenv.root";
+      type = lib.types.path;
+      default = ./.;
+      defaultText = lib.literalExpression "./.";
       description = ''
         The Python project's root directory. Defaults to the root of the devenv project.
         Can be an absolute path or one relative to the root of the devenv project.
@@ -259,6 +261,7 @@ in
     enterShell = lib.concatStringsSep "\n" ([
       ''
         export PYTHONPATH="$DEVENV_PROFILE/${cfg.package.sitePackages}''${PYTHONPATH:+:$PYTHONPATH}"
+        export DIRECTORY_PATH="${directoryPath}"
       ''
     ] ++
     (lib.optional cfg.venv.enable ''

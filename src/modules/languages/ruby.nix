@@ -5,7 +5,7 @@ let
 
   nixpkgs-ruby = inputs.nixpkgs-ruby or (throw ''
     To use languages.ruby.version or languages.ruby.versionFile, you need to add the following to your devenv.yaml:
-    
+
       inputs:
         nixpkgs-ruby:
           url: github:bobvanderlinden/nixpkgs-ruby
@@ -42,7 +42,7 @@ in
         The .ruby-version file path to extract the Ruby version from.
         This automatically sets the `languages.ruby.package` using [nixpkgs-ruby](https://github.com/bobvanderlinden/nixpkgs-ruby).
         When the `.ruby-version` file exists in the same directory as the devenv configuration, you can use:
-        
+
         ```nix
         languages.ruby.versionFile = ./.ruby-version;
         ```
